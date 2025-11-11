@@ -8,9 +8,9 @@
 #define LED1_PIN 48
 #define LED2_PIN 41
 #define BOOT_PIN 0
-//extern WebServer server;
+// extern WebServer server;
 
-//extern bool isAPMode;
+// extern bool isAPMode;
 
 
 
