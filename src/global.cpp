@@ -4,6 +4,9 @@ float glob_humidity = 0;
 xQueueHandle tempQueue = xQueueCreate(5, sizeof(float));
 xQueueHandle humiQueue = xQueueCreate(5, sizeof(float));
 
+// Binary semaphore for temperature-LED synchronization (Task 1)
+SemaphoreHandle_t Sema4need4LedBlinky = xSemaphoreCreateBinary();
+
 String WIFI_SSID;
 String WIFI_PASS;
 String CORE_IOT_TOKEN;

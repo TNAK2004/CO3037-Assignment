@@ -11,6 +11,9 @@ extern float glob_humidity;
 extern xQueueHandle tempQueue;
 extern xQueueHandle humiQueue;
 
+// Semaphore for LED temperature synchronization
+extern SemaphoreHandle_t Sema4need4LedBlinky;
+
 
 extern String WIFI_SSID;
 extern String WIFI_PASS;

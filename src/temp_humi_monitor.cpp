@@ -27,8 +27,15 @@ void temp_humi_monitor(void *pvParameters){
             //return;
         }
 
+        // Send temperature to queue for LED task
         if (xQueueSend(tempQueue, &temperature, pdMS_TO_TICKS(500))==pdPASS){
-            printf("Send Temperature: %f - Free: %d\n", temperature, uxQueueSpacesAvailable(tempQueue));
+            printf("Send Temperature: %.2f°C - Queue Free Spaces: %d\n", 
+                   temperature, uxQueueSpacesAvailable(tempQueue));
+            
+            // Give semaphore to signal LED task that new temperature data is available
+            // This provides synchronization between temp monitoring and LED control
+            xSemaphoreGive(Sema4need4LedBlinky);
+            printf("Semaphore given to theBLinkBlinkOneTask\n");
         } else {
             printf("Failed to send temperature to queue.\n");
         }
