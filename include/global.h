@@ -13,6 +13,7 @@ extern xQueueHandle humiQueue;
 
 // Semaphore for LED temperature synchronization
 extern SemaphoreHandle_t Sema4need4LedBlinky;
+extern SemaphoreHandle_t Sema4need4NeoBlinky;
 
 
 extern String WIFI_SSID;

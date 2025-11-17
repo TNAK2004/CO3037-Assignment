@@ -18,8 +18,10 @@ bool connecting = false;
 
 String mainPage()
 {
-  float temperature = glob_temperature;
-  float humidity = glob_humidity;
+  // float temperature = glob_temperature;
+  // float humidity = glob_humidity;
+  float temperature = 32;
+  float humidity = 78;
   String led1 = led1_state ? "ON" : "OFF";
   String led2 = led2_state ? "ON" : "OFF";
 
@@ -396,7 +398,7 @@ void main_server_task(void *pvParameters)
     {
       if (WiFi.status() == WL_CONNECTED)
       {
-        Serial.print("STA IP address: ");
+        Serial.print(" STA IP address: ");
         Serial.println(WiFi.localIP());
         isWifiConnected = true; // Internet access
 

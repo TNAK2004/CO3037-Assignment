@@ -6,6 +6,7 @@ xQueueHandle humiQueue = xQueueCreate(5, sizeof(float));
 
 // Binary semaphore for temperature-LED synchronization (Task 1)
 SemaphoreHandle_t Sema4need4LedBlinky = xSemaphoreCreateBinary();
+SemaphoreHandle_t Sema4need4NeoBlinky = xSemaphoreCreateBinary();
 
 String WIFI_SSID;
 String WIFI_PASS;
