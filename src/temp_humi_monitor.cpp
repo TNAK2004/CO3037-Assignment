@@ -8,6 +8,7 @@ void temp_humi_monitor(void *pvParameters){
     Wire.begin(11, 12);
     Serial.begin(115200);
     dht20.begin();
+    lcd.backlight();
 
     while (1){
         /* code */
@@ -44,6 +45,22 @@ void temp_humi_monitor(void *pvParameters){
         glob_humidity = humidity;
 
         // Print the results
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Humidity: ");
+        lcd.print(humidity);
+        lcd.print("%");
+        if (humidity < 40) lcd.print("- Low");
+        else if (humidity >= 40 && humidity <= 60) lcd.print("- Normal");
+        else if (humidity > 60) lcd.print("- High");
+
+        lcd.setCursor(0, 1);
+        lcd.print("Temperature: ");
+        lcd.print(temperature);
+        lcd.print("°C");
+        if (temperature <= 26) lcd.print("- Cold");
+        else if (temperature > 26 && temperature < 30) lcd.print("- Normal");
+        else if (temperature >= 30) lcd.print("- Hot");
         
         Serial.print("Humidity: ");
         Serial.print(humidity);
