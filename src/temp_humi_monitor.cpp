@@ -2,14 +2,26 @@
 DHT20 dht20;
 LiquidCrystal_I2C lcd(33,16,2);
 
+// Queue for LCD display data
+struct LCDData {
+    float temperature;
+    float humidity;
+};
+
+QueueHandle_t lcdQueue = NULL;
 
 void temp_humi_monitor(void *pvParameters){
 
     Wire.begin(11, 12);
     Serial.begin(115200);
     dht20.begin();
-    // lcd.backlight();
+    lcd.backlight();
 
+    // Create LCD queue with capacity for 3 LCD data structures
+    lcdQueue = xQueueCreate(3, sizeof(LCDData));
+    if (lcdQueue == NULL) {
+        Serial.println("Failed to create LCD queue!");
+    }
 
     while (1){
         /* code */
@@ -50,29 +62,50 @@ void temp_humi_monitor(void *pvParameters){
             printf("Failed to send humidity to queue.\n");
         }
 
+        // Send data to LCD queue and give semaphore
+        LCDData lcdData;
+        lcdData.temperature = temperature;
+        lcdData.humidity = humidity;
+        
+        if (xQueueSend(lcdQueue, &lcdData, pdMS_TO_TICKS(500)) == pdPASS) {
+            printf("Send LCD Data - Temp: %.2f°C, Humi: %.2f%% - Free: %d\n", 
+                   temperature, humidity, uxQueueSpacesAvailable(lcdQueue));
+            xSemaphoreGive(Sema4need4LCD);
+        } else {
+            printf("Failed to send LCD data to queue.\n");
+        }
+
+
+        if (xSemaphoreTake(Sema4need4LCD, portMAX_DELAY)) {
+            LCDData displayData;
+            if (xQueueReceive(lcdQueue, &displayData, pdMS_TO_TICKS(500)) == pdPASS) {
+                printf("[LCD] Receive Data - Temp: %.2f°C, Humi: %.2f%% - Free: %d\n", 
+                       displayData.temperature, displayData.humidity, uxQueueSpacesAvailable(lcdQueue));
+                
+                lcd.clear();
+                lcd.setCursor(0, 0);
+                lcd.print("H:");
+                lcd.print(displayData.humidity, 1);
+                lcd.print("%");
+                if (displayData.humidity < 40) lcd.print(" Low");
+                else if (displayData.humidity >= 40 && displayData.humidity <= 60) lcd.print(" Norm");
+                else if (displayData.humidity > 60) lcd.print(" High");
+
+                lcd.setCursor(0, 1);
+                lcd.print("T:");
+                lcd.print(displayData.temperature, 1);
+                lcd.print("C");
+                if (displayData.temperature <= 26) lcd.print(" Cold");
+                else if (displayData.temperature > 26 && displayData.temperature < 30) lcd.print(" Norm");
+                else if (displayData.temperature >= 30) lcd.print(" Hot");
+            }
+        }
+
         // //Update global variables for temperature and humidity
         // glob_temperature = temperature;
         // glob_humidity = humidity;
 
         // Print the results
-
-        // lcd.clear();
-        // lcd.setCursor(0, 0);
-        // lcd.print("Humidity: ");
-        // lcd.print(humidity);
-        // lcd.print("%");
-        // if (humidity < 40) lcd.print("- Low");
-        // else if (humidity >= 40 && humidity <= 60) lcd.print("- Normal");
-        // else if (humidity > 60) lcd.print("- High");
-
-        // lcd.setCursor(0, 1);
-        // lcd.print("Temperature: ");
-        // lcd.print(temperature);
-        // lcd.print("°C");
-        // if (temperature <= 26) lcd.print("- Cold");
-        // else if (temperature > 26 && temperature < 30) lcd.print("- Normal");
-        // else if (temperature >= 30) lcd.print("- Hot");
-        
         Serial.print("Humidity: ");
         Serial.print(humidity);
         Serial.print("%  Temperature: ");
