@@ -2,13 +2,11 @@
 DHT20 dht20;
 LiquidCrystal_I2C lcd(33,16,2);
 
-// Queue for LCD display data
 struct LCDData {
     float temperature;
     float humidity;
 };
 
-QueueHandle_t lcdQueue = NULL;
 
 void temp_humi_monitor(void *pvParameters){
 
@@ -17,11 +15,6 @@ void temp_humi_monitor(void *pvParameters){
     dht20.begin();
     lcd.backlight();
 
-    // Create LCD queue with capacity for 3 LCD data structures
-    lcdQueue = xQueueCreate(3, sizeof(LCDData));
-    if (lcdQueue == NULL) {
-        Serial.println("Failed to create LCD queue!");
-    }
 
     while (1){
         /* code */

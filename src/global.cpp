@@ -3,6 +3,7 @@ float glob_temperature = 0;
 float glob_humidity = 0;
 xQueueHandle tempQueue = xQueueCreate(5, sizeof(float));
 xQueueHandle humiQueue = xQueueCreate(5, sizeof(float));
+QueueHandle_t lcdQueue = xQueueCreate(5, sizeof(float));
 
 // Binary semaphore for temperature-LED synchronization (Task 1)
 SemaphoreHandle_t Sema4need4LedBlinky_Temp = xSemaphoreCreateBinary();

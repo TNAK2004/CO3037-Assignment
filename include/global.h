@@ -10,6 +10,7 @@ extern float glob_temperature;
 extern float glob_humidity;
 extern xQueueHandle tempQueue;
 extern xQueueHandle humiQueue;
+extern QueueHandle_t lcdQueue;
 
 // Semaphore for LED temperature synchronization
 extern SemaphoreHandle_t Sema4need4LedBlinky_Temp;
