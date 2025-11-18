@@ -20,8 +20,23 @@ String mainPage()
 {
   // float temperature = glob_temperature;
   // float humidity = glob_humidity;
-  float temperature = 32;
-  float humidity = 78;
+  float temperature = 0;
+  float humidity = 0;
+  
+  if (xSemaphoreTake(Sema4need4Humi, portMAX_DELAY))
+  {
+      if (xQueueReceive(humiQueue, &humidity , portMAX_DELAY)) {  
+          printf("[Main Page] Receive Humidity: %f - Free: %d\n", humidity, uxQueueSpacesAvailable(humiQueue));
+      } 
+  }
+
+  if (xSemaphoreTake(Sema4need4Temp, portMAX_DELAY))
+  {
+      if (xQueueReceive(tempQueue, &temperature , portMAX_DELAY)) {  
+          printf("[Main Page] Receive Temperature: %f - Free: %d\n", temperature, uxQueueSpacesAvailable(tempQueue));
+      } 
+  }
+
   String led1 = led1_state ? "ON" : "OFF";
   String led2 = led2_state ? "ON" : "OFF";
 
@@ -309,8 +324,29 @@ void handleToggle()
 
 void handleSensors()
 {
-  float t = glob_temperature;
-  float h = glob_humidity;
+  float t = 0;
+  float h = 0;
+
+  if (xSemaphoreTake(Sema4need4LedBlinky_Temp, portMAX_DELAY) == pdTRUE)
+  {
+    if (xQueueReceive(tempQueue, &t, pdMS_TO_TICKS(500))==pdPASS){
+      printf("[Server] Receive Temperature: %f - Free: %d\n", t, uxQueueSpacesAvailable(tempQueue));
+    }
+    else{
+      printf("[Server] No Temperature received\n");
+    }
+  }
+
+    if (xSemaphoreTake(Sema4need4NeoBlinky_Humi, portMAX_DELAY) == pdTRUE)
+  {
+    if (xQueueReceive(humiQueue, &h, pdMS_TO_TICKS(500))==pdPASS){
+      printf("[Server] Receive Humidity: %f - Free: %d\n", h, uxQueueSpacesAvailable(humiQueue));
+    }
+    else{
+      printf("[Server] No Humidity received\n");
+    }
+  }
+
   String json = "{\"temp\":" + String(t) + ",\"hum\":" + String(h) + "}";
   server.send(200, "application/json", json);
 }

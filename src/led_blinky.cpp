@@ -9,9 +9,7 @@ void led_blinky(void *pvParameters){
     printf("[LED_BLINK] Task started - waiting for temperature data\n");
     
     while(1) {
-        // Wait for semaphore signal from temp_humi_monitor task
-        // This ensures synchronization between temperature reading and LED control
-        if (xSemaphoreTake(Sema4need4LedBlinky, portMAX_DELAY) == pdTRUE) {
+        if (xSemaphoreTake(Sema4need4LedBlinky_Temp, portMAX_DELAY)) {
             if (xQueueReceive(tempQueue, &temperature, pdMS_TO_TICKS(500))==pdPASS){
                 printf("[LED_BLINK] Receive Temperature: %f - Free: %d\n", temperature, uxQueueSpacesAvailable(tempQueue));
             } else {

@@ -8,6 +8,8 @@ void temp_humi_monitor(void *pvParameters){
     Wire.begin(11, 12);
     Serial.begin(115200);
     dht20.begin();
+    // lcd.backlight();
+
 
     while (1){
         /* code */
@@ -27,30 +29,49 @@ void temp_humi_monitor(void *pvParameters){
             //return;
         }
 
-        // Send temperature to queue for LED task
+
         if (xQueueSend(tempQueue, &temperature, pdMS_TO_TICKS(500))==pdPASS){
             printf("Send Temperature: %.2f°C - Free: %d\n", 
                    temperature, uxQueueSpacesAvailable(tempQueue));
             
-            // Give semaphore to signal LED task that new temperature data is available
-            // This provides synchronization between temp monitoring and LED control
-            xSemaphoreGive(Sema4need4LedBlinky);
-            xSemaphoreGive(Sema4need4NeoBlinky);
+            xSemaphoreGive(Sema4need4Temp);
+            xSemaphoreGive(Sema4need4LedBlinky_Temp);
+            
         } else {
             printf("Failed to send temperature to queue.\n");
         }
 
         if (xQueueSend(humiQueue, &humidity, pdMS_TO_TICKS(500))==pdPASS){
             printf("Send Humidity: %f - Free: %d\n", humidity, uxQueueSpacesAvailable(humiQueue));
+
+            xSemaphoreGive(Sema4need4NeoBlinky_Humi);
+            xSemaphoreGive(Sema4need4Humi);
         } else {
             printf("Failed to send humidity to queue.\n");
         }
 
-        //Update global variables for temperature and humidity
-        glob_temperature = temperature;
-        glob_humidity = humidity;
+        // //Update global variables for temperature and humidity
+        // glob_temperature = temperature;
+        // glob_humidity = humidity;
 
         // Print the results
+
+        // lcd.clear();
+        // lcd.setCursor(0, 0);
+        // lcd.print("Humidity: ");
+        // lcd.print(humidity);
+        // lcd.print("%");
+        // if (humidity < 40) lcd.print("- Low");
+        // else if (humidity >= 40 && humidity <= 60) lcd.print("- Normal");
+        // else if (humidity > 60) lcd.print("- High");
+
+        // lcd.setCursor(0, 1);
+        // lcd.print("Temperature: ");
+        // lcd.print(temperature);
+        // lcd.print("°C");
+        // if (temperature <= 26) lcd.print("- Cold");
+        // else if (temperature > 26 && temperature < 30) lcd.print("- Normal");
+        // else if (temperature >= 30) lcd.print("- Hot");
         
         Serial.print("Humidity: ");
         Serial.print(humidity);
