@@ -11,6 +11,12 @@ SemaphoreHandle_t Sema4need4NeoBlinky_Humi = xSemaphoreCreateBinary();
 SemaphoreHandle_t Sema4need4Humi = xSemaphoreCreateBinary();
 SemaphoreHandle_t Sema4need4Temp = xSemaphoreCreateBinary();
 SemaphoreHandle_t Sema4need4LCD = xSemaphoreCreateBinary();
+SemaphoreHandle_t Sema4LCDtemp = xSemaphoreCreateBinary();
+SemaphoreHandle_t Sema4LCDtempA = xSemaphoreCreateBinary();
+SemaphoreHandle_t Sema4LCDtempB = xSemaphoreCreateBinary();
+SemaphoreHandle_t Sema4LCDhumi = xSemaphoreCreateBinary();
+SemaphoreHandle_t Sema4LCDhumiA = xSemaphoreCreateBinary();
+SemaphoreHandle_t Sema4LCDhumiB = xSemaphoreCreateBinary();
 
 String WIFI_SSID;
 String WIFI_PASS;

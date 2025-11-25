@@ -9,7 +9,7 @@ void led_blinky(void *pvParameters){
     printf("[LED_BLINK] Task started - waiting for temperature data\n");
     
     while(1) {
-        if (xSemaphoreTake(Sema4need4LedBlinky_Temp, portMAX_DELAY)) {
+        // if (xSemaphoreTake(Sema4need4LedBlinky_Temp, portMAX_DELAY)) {
             if (xQueueReceive(tempQueue, &temperature, pdMS_TO_TICKS(500))==pdPASS){
                 printf("[LED_BLINK] Receive Temperature: %f - Free: %d\n", temperature, uxQueueSpacesAvailable(tempQueue));
             } else {
@@ -22,14 +22,14 @@ void led_blinky(void *pvParameters){
             }
             else if (temperature > 26 && temperature < 30){
                 digitalWrite(LED_GPIO, HIGH);  // turn the LED ON
-                vTaskDelay(1000);
+                vTaskDelay(500);
                 digitalWrite(LED_GPIO, LOW);  // turn the LED OFF
-                vTaskDelay(1000);
+                vTaskDelay(500);
             }
             else if (temperature >= 30){
                 digitalWrite(LED_GPIO, HIGH);  // turn the LED ON
                 vTaskDelay(1000);
             }
-        }
+        // }
     }
 }

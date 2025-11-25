@@ -18,6 +18,12 @@ extern SemaphoreHandle_t Sema4need4NeoBlinky_Humi;
 extern SemaphoreHandle_t Sema4need4Humi;
 extern SemaphoreHandle_t Sema4need4Temp;
 extern SemaphoreHandle_t Sema4need4LCD;
+extern SemaphoreHandle_t Sema4LCDtemp;
+extern SemaphoreHandle_t Sema4LCDtempA;
+extern SemaphoreHandle_t Sema4LCDtempB;
+extern SemaphoreHandle_t Sema4LCDhumi;
+extern SemaphoreHandle_t Sema4LCDhumiA;
+extern SemaphoreHandle_t Sema4LCDhumiB;
 
 
 extern String WIFI_SSID;
