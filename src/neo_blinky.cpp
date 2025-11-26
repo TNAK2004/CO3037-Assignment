@@ -12,23 +12,23 @@ void neo_blinky(void *pvParameters){
     float humidity = 0;
     while(1) {
         // if (xSemaphoreTake(Sema4need4NeoBlinky_Humi, portMAX_DELAY)) {
-            if (xQueueReceive(humiQueue, &humidity, pdMS_TO_TICKS(500))==pdPASS){
-                printf("[NEO_BLINK] Receive Humidity: %f - Free: %d\n", humidity, uxQueueSpacesAvailable(humiQueue));
-            } else {
-                printf("[NEO_BLINK] Failed to receive humidity.\n\n");
-            }
+            // if (xQueueReceive(humiQueue, &humidity, pdMS_TO_TICKS(500))==pdPASS){
+            //     printf("[NEO_BLINK] Receive Humidity: %f - Free: %d\n", humidity, uxQueueSpacesAvailable(humiQueue));
+            // } else {
+            //     printf("[NEO_BLINK] Failed to receive humidity.\n\n");
+            // }
             
-            if (humidity < 40){
+            if (xSemaphoreTake(Sema4NEO, pdMS_TO_TICKS(500))){
                 strip.setPixelColor(0, strip.Color(255, 0, 0)); // Set pixel 0 to red
                 strip.show(); // Update the strip
 
                 // Wait for 500 milliseconds
                 vTaskDelay(500);
-            } else if (humidity >= 40 && humidity <= 60){
+            } else if (xSemaphoreTake(Sema4NEOA, pdMS_TO_TICKS(500))){
                 strip.setPixelColor(0, strip.Color(0, 255, 0)); // Set pixel 0 to green
                 strip.show();
                 vTaskDelay(500);
-            } else if (humidity > 60){
+            } else if (xSemaphoreTake(Sema4NEOB, pdMS_TO_TICKS(500))){
                 strip.setPixelColor(0, strip.Color(0, 0, 255)); // Set pixel 0 to blue
                 strip.show();
                 vTaskDelay(500);

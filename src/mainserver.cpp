@@ -34,7 +34,7 @@ String mainPage()
   // {
       if (xQueueReceive(tempQueue, &temperature , pdMS_TO_TICKS(500))) {  
           printf("[Main Page] Receive Temperature: %f - Free: %d\n", temperature, uxQueueSpacesAvailable(tempQueue));
-      } 
+      }
   // }
 
   String led1 = led1_state ? "ON" : "OFF";

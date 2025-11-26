@@ -54,23 +54,23 @@ void tiny_ml_task(void *pvParameters)
 
         // Prepare input data (e.g., sensor readings)
         // For a simple example, let's assume a single float input
-        input->data.f[0] = glob_temperature;
-        input->data.f[1] = glob_humidity;
+        // input->data.f[0] = glob_temperature;
+        // input->data.f[1] = glob_humidity;
 
-        // float temperature = 0, humidity = 0;
-        // if (xQueueReceive(tempQueue, &temperature, pdMS_TO_TICKS(500))==pdPASS){
-        //     printf("Receive Temperature: %f - Free: %d\n", temperature, uxQueueSpacesAvailable(tempQueue));
-        // } else {
-        //     printf("Failed to receive temperature.\n\n");
-        // }
-        // if (xQueueReceive(humiQueue, &humidity, pdMS_TO_TICKS(500))==pdPASS){
-        //     printf("Receive Humidity: %f - Free: %d\n", humidity, uxQueueSpacesAvailable(humiQueue));
-        // } else {
-        //     printf("Failed to receive humidity.\n\n");
-        // }
+        float temperature = 0, humidity = 0;
+        if (xQueueReceive(tempQueue, &temperature, pdMS_TO_TICKS(500))==pdPASS){
+            printf("Receive Temperature: %f - Free: %d\n", temperature, uxQueueSpacesAvailable(tempQueue));
+        } else {
+            printf("Failed to receive temperature.\n\n");
+        }
+        if (xQueueReceive(humiQueue, &humidity, pdMS_TO_TICKS(500))==pdPASS){
+            printf("Receive Humidity: %f - Free: %d\n", humidity, uxQueueSpacesAvailable(humiQueue));
+        } else {
+            printf("Failed to receive humidity.\n\n");
+        }
 
-        // input->data.f[0] = temperature;
-        // input->data.f[1] = humidity;
+        input->data.f[0] = temperature;
+        input->data.f[1] = humidity;
 
         // Run inference
         TfLiteStatus invoke_status = interpreter->Invoke();

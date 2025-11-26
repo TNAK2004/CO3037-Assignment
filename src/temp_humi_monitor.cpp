@@ -2,11 +2,6 @@
 DHT20 dht20;
 LiquidCrystal_I2C lcd(0x21,16,2);
 
-struct LCDData {
-    float temperature;
-    float humidity;
-};
-
 
 void temp_humi_monitor(void *pvParameters){
 
@@ -23,14 +18,32 @@ void temp_humi_monitor(void *pvParameters){
         dht20.read();
         // Reading temperature in Celsius
         float temperature = dht20.getTemperature();
-        if (temperature <= 26) xSemaphoreGive(Sema4LCDtemp);
-        else if (temperature > 26 && temperature < 30) xSemaphoreGive(Sema4LCDtempA);
-        else if (temperature >= 30) xSemaphoreGive(Sema4LCDtempB);
+        if (temperature <= 26) {
+            xSemaphoreGive(Sema4LCDtemp);
+            xSemaphoreGive(Sema4LED);
+        }
+        else if (temperature > 26 && temperature < 30) {
+            xSemaphoreGive(Sema4LCDtempA);
+            xSemaphoreGive(Sema4LEDA);
+        }
+        else if (temperature >= 30) {
+            xSemaphoreGive(Sema4LCDtempB);
+            xSemaphoreGive(Sema4LEDB);
+        }
         // Reading humidity
         float humidity = dht20.getHumidity();
-        if (humidity < 40) xSemaphoreGive(Sema4LCDhumi);
-        else if (humidity >= 40 && humidity <= 60) xSemaphoreGive(Sema4LCDhumiA);
-        else if (humidity > 60) xSemaphoreGive(Sema4LCDhumiB);
+        if (humidity < 40) {
+            xSemaphoreGive(Sema4LCDhumi);
+            xSemaphoreGive(Sema4NEO);
+        }
+        else if (humidity >= 40 && humidity <= 60) {
+            xSemaphoreGive(Sema4LCDhumiA);
+            xSemaphoreGive(Sema4NEOA);
+        }
+        else if (humidity > 60) {
+            xSemaphoreGive(Sema4LCDhumiB);
+            xSemaphoreGive(Sema4NEOB);
+        }
 
         
 
