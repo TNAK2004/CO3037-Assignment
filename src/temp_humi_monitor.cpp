@@ -79,13 +79,13 @@ void temp_humi_monitor(void *pvParameters){
         // Display directly on LCD
         lcd.clear();
         lcd.setCursor(0, 0);
-        lcd.print("H:");
+        lcd.print("Humidity:");
         if (xSemaphoreTake(Sema4LCDhumi, pdMS_TO_TICKS(500))) lcd.print(" Low");
         else if (xSemaphoreTake(Sema4LCDhumiA, pdMS_TO_TICKS(500))) lcd.print(" Norm");
         else if (xSemaphoreTake(Sema4LCDhumiB, pdMS_TO_TICKS(500))) lcd.print(" High");
 
         lcd.setCursor(0, 1);
-        lcd.print("T:");
+        lcd.print("Temperature:");
         if (xSemaphoreTake(Sema4LCDtemp, pdMS_TO_TICKS(500))) lcd.print(" Cold");
         else if (xSemaphoreTake(Sema4LCDtempA, pdMS_TO_TICKS(500))) lcd.print(" Norm");
         else if (xSemaphoreTake(Sema4LCDtempB, pdMS_TO_TICKS(500))) lcd.print(" Hot");
