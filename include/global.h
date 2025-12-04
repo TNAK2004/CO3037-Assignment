@@ -8,8 +8,18 @@
 
 extern float glob_temperature;
 extern float glob_humidity;
-extern xQueueHandle tempQueue;
-extern xQueueHandle humiQueue;
+
+// Separate queues for each consumer task
+extern xQueueHandle tempQueue_LED;
+extern xQueueHandle tempQueue_Server;
+extern xQueueHandle tempQueue_CoreIOT;
+extern xQueueHandle tempQueue_TinyML;
+
+extern xQueueHandle humiQueue_Neo;
+extern xQueueHandle humiQueue_Server;
+extern xQueueHandle humiQueue_CoreIOT;
+extern xQueueHandle humiQueue_TinyML;
+
 extern QueueHandle_t lcdQueue;
 
 // Semaphore for LED temperature synchronization

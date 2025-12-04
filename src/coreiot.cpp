@@ -164,19 +164,13 @@ void coreiot_task(void *pvParameters){
         client.loop();
 
 
-        // if (xSemaphoreTake(Sema4need4Humi, portMAX_DELAY))
-        // {
-            if (xQueueReceive(humiQueue, &humidity , pdMS_TO_TICKS(500))) {  
-                printf("[CoreIOT] Receive Humidity: %f - Free: %d\n", humidity, uxQueueSpacesAvailable(humiQueue));
-            } 
-        // }
+        if (xQueueReceive(humiQueue_CoreIOT, &humidity, pdMS_TO_TICKS(100))) {  
+            printf("[CoreIOT] Receive Humidity: %.2f\n", humidity);
+        }
 
-        // if (xSemaphoreTake(Sema4need4Temp, portMAX_DELAY))
-        // {
-            if (xQueueReceive(tempQueue, &temperature , pdMS_TO_TICKS(500))) {  
-                printf("[CoreIOT] Receive Temperature: %f - Free: %d\n", temperature, uxQueueSpacesAvailable(tempQueue));
-            } 
-        // }
+        if (xQueueReceive(tempQueue_CoreIOT, &temperature, pdMS_TO_TICKS(100))) {  
+            printf("[CoreIOT] Receive Temperature: %.2f\n", temperature);
+        }
 
         // Sample payload, publish to 'v1/devices/me/telemetry'
         String payload = "{\"temperature\":" + String(temperature) +  ",\"humidity\":" + String(humidity) + "}";

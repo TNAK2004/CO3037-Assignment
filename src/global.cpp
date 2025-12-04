@@ -1,8 +1,18 @@
 #include "global.h"
 float glob_temperature = 0;
 float glob_humidity = 0;
-xQueueHandle tempQueue = xQueueCreate(5, sizeof(float));
-xQueueHandle humiQueue = xQueueCreate(5, sizeof(float));
+
+// Separate queues for each consumer task
+xQueueHandle tempQueue_LED = xQueueCreate(5, sizeof(float));
+xQueueHandle tempQueue_Server = xQueueCreate(5, sizeof(float));
+xQueueHandle tempQueue_CoreIOT = xQueueCreate(5, sizeof(float));
+xQueueHandle tempQueue_TinyML = xQueueCreate(5, sizeof(float));
+
+xQueueHandle humiQueue_Neo = xQueueCreate(5, sizeof(float));
+xQueueHandle humiQueue_Server = xQueueCreate(5, sizeof(float));
+xQueueHandle humiQueue_CoreIOT = xQueueCreate(5, sizeof(float));
+xQueueHandle humiQueue_TinyML = xQueueCreate(5, sizeof(float));
+
 QueueHandle_t lcdQueue = xQueueCreate(5, sizeof(float));
 
 // Binary semaphore for temperature-LED synchronization (Task 1)

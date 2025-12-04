@@ -15,6 +15,7 @@ WebServer server(80);
 
 unsigned long connect_start_ms = 0;
 bool connecting = false;
+// bool shouldRedirect = false; //new - flag to trigger redirect after connection
 
 String mainPage()
 {
@@ -23,19 +24,13 @@ String mainPage()
   float temperature = 0;
   float humidity = 0;
   
-  // if (xSemaphoreTake(Sema4need4Humi, portMAX_DELAY))
-  // {
-      if (xQueueReceive(humiQueue, &humidity , pdMS_TO_TICKS(500))) {  
-          printf("[Main Page] Receive Humidity: %f - Free: %d\n", humidity, uxQueueSpacesAvailable(humiQueue));
-      } 
-  // }
+  if (xQueueReceive(humiQueue_Server, &humidity, 0)) {  
+      printf("[Main Page] Receive Humidity: %.2f\n", humidity);
+  }
 
-  // if (xSemaphoreTake(Sema4need4Temp, portMAX_DELAY))
-  // {
-      if (xQueueReceive(tempQueue, &temperature , pdMS_TO_TICKS(500))) {  
-          printf("[Main Page] Receive Temperature: %f - Free: %d\n", temperature, uxQueueSpacesAvailable(tempQueue));
-      } 
-  // }
+  if (xQueueReceive(tempQueue_Server, &temperature, 0)) {  
+      printf("[Main Page] Receive Temperature: %.2f\n", temperature);
+  }
 
   String led1 = led1_state ? "ON" : "OFF";
   String fan = fan_state ? "ON" : "OFF";
@@ -370,25 +365,13 @@ void handleSensors()
   float t = 0;
   float h = 0;
 
-  // if (xSemaphoreTake(Sema4need4LedBlinky_Temp, portMAX_DELAY) == pdTRUE)
-  // {
-    if (xQueueReceive(tempQueue, &t, pdMS_TO_TICKS(500))==pdPASS){
-      printf("[Server] Receive Temperature: %f - Free: %d\n", t, uxQueueSpacesAvailable(tempQueue));
-    }
-    else{
-      printf("[Server] No Temperature received\n");
-    }
-  //}
+  if (xQueueReceive(tempQueue_Server, &t, 0)){
+    printf("[Server] Receive Temperature: %.2f\n", t);
+  }
 
-  // if (xSemaphoreTake(Sema4need4NeoBlinky_Humi, portMAX_DELAY) == pdTRUE)
-  //{
-    if (xQueueReceive(humiQueue, &h, pdMS_TO_TICKS(500))==pdPASS){
-      printf("[Server] Receive Humidity: %f - Free: %d\n", h, uxQueueSpacesAvailable(humiQueue));
-    }
-    else{
-      printf("[Server] No Humidity received\n");
-    }
-  //}
+  if (xQueueReceive(humiQueue_Server, &h, 0)){
+    printf("[Server] Receive Humidity: %.2f\n", h);
+  }
 
   String json = "{\"temp\":" + String(t) + ",\"hum\":" + String(h) + "}";
   server.send(200, "application/json", json);
@@ -404,8 +387,30 @@ void handleConnect()
   isAPMode = false;
   connecting = true;
   connect_start_ms = millis();
+  // shouldRedirect = true;  //new - set flag to enable redirect after connection
   connectToWiFi();
 }
+
+//new - endpoint to check WiFi connection status and get new IP
+// void handleStatus()
+// {
+//   String json = "{";
+//   if (WiFi.status() == WL_CONNECTED && !isAPMode)
+//   {
+//     json += "\"status\":\"connected\",";
+//     json += "\"ip\":\"" + WiFi.localIP().toString() + "\"";
+//   }
+//   else if (connecting)
+//   {
+//     json += "\"status\":\"connecting\"";
+//   }
+//   else
+//   {
+//     json += "\"status\":\"disconnected\"";
+//   }
+//   json += "}";
+//   server.send(200, "application/json", json);
+// }
 
 // ========== WiFi ==========
 void setupServer()
@@ -415,6 +420,7 @@ void setupServer()
   server.on("/sensors", HTTP_GET, handleSensors);
   server.on("/settings", HTTP_GET, handleSettings);
   server.on("/connect", HTTP_GET, handleConnect);
+  // server.on("/status", HTTP_GET, handleStatus); //new - register status endpoint
   server.begin();
 }
 
@@ -487,6 +493,14 @@ void main_server_task(void *pvParameters)
 
         isAPMode = false;
         connecting = false;
+        
+        //new - handle redirect after successful connection
+        // if (shouldRedirect)
+        // {
+        //   String newIP = WiFi.localIP().toString();
+        //   Serial.println("Sending redirect to: " + newIP);
+        //   shouldRedirect = false;
+        // }
       }
       else if (millis() - connect_start_ms > 10000)
       { // timeout 10s
@@ -495,6 +509,7 @@ void main_server_task(void *pvParameters)
         setupServer();
         connecting = false;
         isWifiConnected = false;
+        // shouldRedirect = false; //new - reset redirect flag on timeout
       }
     }
 

@@ -6,6 +6,6 @@
 // #include <task_webserver.h>
 
 // extern bool Wifi_reconnect();
-// // startAP() is declared in mainserver.h
+// extern void startAP();
 
 // #endif

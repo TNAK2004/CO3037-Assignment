@@ -11,11 +11,8 @@ void neo_blinky(void *pvParameters){
 
     float humidity = 0;
     while(1) {
-        // if (xSemaphoreTake(Sema4need4NeoBlinky_Humi, portMAX_DELAY)) {
-            if (xQueueReceive(humiQueue, &humidity, pdMS_TO_TICKS(500))==pdPASS){
-                printf("[NEO_BLINK] Receive Humidity: %f - Free: %d\n", humidity, uxQueueSpacesAvailable(humiQueue));
-            } else {
-                printf("[NEO_BLINK] Failed to receive humidity.\n\n");
+            if (xQueueReceive(humiQueue_Neo, &humidity, pdMS_TO_TICKS(100))){
+                printf("[NEO_BLINK] Receive Humidity: %.2f\n", humidity);
             }
             
             if (humidity < 40){
