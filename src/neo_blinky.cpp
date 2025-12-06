@@ -11,32 +11,32 @@ void neo_blinky(void *pvParameters){
 
     float humidity = 0;
     while(1) {
-        if (xQueueReceive(humiQueue, &humidity, pdMS_TO_TICKS(500))==pdPASS){
-            printf("Receive Humidity: %f - Free: %d\n", humidity, uxQueueSpacesAvailable(humiQueue));
-        } else {
-            printf("Failed to receive humidity.\n\n");
-        }
-        
-        if (humidity < 40){
-            strip.setPixelColor(0, strip.Color(255, 0, 0)); // Set pixel 0 to red
+            if (xQueueReceive(humiQueue_Neo, &humidity, pdMS_TO_TICKS(100))){
+                printf("[NEO_BLINK] Receive Humidity: %.2f\n", humidity);
+            }
+            
+            if (humidity < 40){
+                strip.setPixelColor(0, strip.Color(255, 0, 0)); // Set pixel 0 to red
+                strip.show(); // Update the strip
+
+                // Wait for 500 milliseconds
+                vTaskDelay(500);
+            } else if (humidity >= 40 && humidity <= 60){
+                strip.setPixelColor(0, strip.Color(0, 255, 0)); // Set pixel 0 to green
+                strip.show();
+                vTaskDelay(500);
+            } else if (humidity > 60){
+                strip.setPixelColor(0, strip.Color(0, 0, 255)); // Set pixel 0 to blue
+                strip.show();
+                vTaskDelay(500);
+            }
+            // Set the pixel to off
+            strip.setPixelColor(0, strip.Color(0, 0, 0)); // Turn pixel 0 off
             strip.show(); // Update the strip
 
-            // Wait for 500 milliseconds
+            // Wait for another 500 milliseconds
             vTaskDelay(500);
-        } else if (humidity >= 40 && humidity <= 60){
-            strip.setPixelColor(0, strip.Color(0, 255, 0)); // Set pixel 0 to green
-            strip.show();
-            vTaskDelay(500);
-        } else if (humidity > 60){
-            strip.setPixelColor(0, strip.Color(0, 0, 255)); // Set pixel 0 to blue
-            strip.show();
-            vTaskDelay(500);
-        }
-        // Set the pixel to off
-        strip.setPixelColor(0, strip.Color(0, 0, 0)); // Turn pixel 0 off
-        strip.show(); // Update the strip
+        // }
 
-        // Wait for another 500 milliseconds
-        vTaskDelay(500);
     }
 }

@@ -2,7 +2,7 @@
 
 // ----------- CONFIGURE THESE! -----------
 const char* coreIOT_Server = "app.coreiot.io";  
-const char* coreIOT_Token = "g7drm1amhd3dchr379xu";   // Device Access Token
+const char* coreIOT_Token = "uiopBTyMUT1LEATqojUw";   // Device Access Token uiopBTyMUT1LEATqojUw
 const int   mqttPort = 1883;
 // ----------------------------------------
 
@@ -34,45 +34,86 @@ void reconnect() {
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
-  Serial.println("] ");
+  Serial.println("]");
 
-  // Allocate a temporary buffer for the message
   char message[length + 1];
   memcpy(message, payload, length);
   message[length] = '\0';
+
   Serial.print("Payload: ");
   Serial.println(message);
 
-  // Parse JSON
   StaticJsonDocument<256> doc;
   DeserializationError error = deserializeJson(doc, message);
 
   if (error) {
-    Serial.print("deserializeJson() failed: ");
-    Serial.println(error.c_str());
+    Serial.println("JSON parse failed!");
     return;
   }
 
   const char* method = doc["method"];
+  JsonVariant params = doc["params"];
+
+  // ----------------------------- SET LED -----------------------------
   if (strcmp(method, "setStateLED") == 0) {
-    // Check params type (could be boolean, int, or string according to your RPC)
-    // Example: {"method": "setValueLED", "params": "ON"}
-    const char* params = doc["params"];
-
-    if (strcmp(params, "ON") == 0) {
-      Serial.println("Device turned ON.");
-      //TODO
-
-    } else {   
-      Serial.println("Device turned OFF.");
-      //TODO
-
+    if (params == "ON" || params == 1) {
+      digitalWrite(LED1_PIN, HIGH);
+      Serial.println("LED → ON");
+    } else {
+      digitalWrite(LED1_PIN, LOW);
+      Serial.println("LED → OFF");
     }
-  } else {
+
+    client.publish("v1/devices/me/rpc/response/1",
+                   "{\"result\":\"LED updated\"}");
+  }
+
+  // ----------------------------- SET FAN -----------------------------
+  else if (strcmp(method, "setStateFAN") == 0) {
+    if (params == "ON" || params == 1) {
+      digitalWrite(FAN_PIN, HIGH);
+      Serial.println("FAN → ON");
+    } else {
+      digitalWrite(FAN_PIN, LOW);
+      Serial.println("FAN → OFF");
+    }
+
+    client.publish("v1/devices/me/rpc/response/1",
+                   "{\"result\":\"FAN updated\"}");
+  }
+
+  // ----------------------------- GET LED STATE -----------------------------
+  else if (strcmp(method, "getStateLED") == 0) {
+
+    int state = digitalRead(LED1_PIN);
+
+    String resp = String("{\"state\":") + (state == HIGH ? "\"ON\"" : "\"OFF\"") + "}";
+    client.publish("v1/devices/me/rpc/response/1", resp.c_str());
+
+    Serial.print("Return LED state: ");
+    Serial.println(resp);
+  }
+
+  // ----------------------------- GET FAN STATE -----------------------------
+  else if (strcmp(method, "getStateFAN") == 0) {
+
+    int state = digitalRead(FAN_PIN);
+
+    String resp = String("{\"state\":") + (state == HIGH ? "\"ON\"" : "\"OFF\"") + "}";
+    client.publish("v1/devices/me/rpc/response/1", resp.c_str());
+
+    Serial.print("Return FAN state: ");
+    Serial.println(resp);
+  }
+
+  // ----------------------------- UNKNOWN -----------------------------
+  else {
     Serial.print("Unknown method: ");
     Serial.println(method);
   }
 }
+
+
 
 
 void setup_coreiot(){
@@ -97,6 +138,12 @@ void setup_coreiot(){
 
   Serial.println(" Connected!");
 
+  // Initialize LED pin
+  pinMode(LED1_PIN, OUTPUT);
+  pinMode(FAN_PIN, OUTPUT);
+  digitalWrite(FAN_PIN, LOW);
+  digitalWrite(LED1_PIN, LOW);
+
   client.setServer(coreIOT_Server, mqttPort);
   client.setCallback(callback);
 
@@ -105,6 +152,9 @@ void setup_coreiot(){
 void coreiot_task(void *pvParameters){
 
     setup_coreiot();
+    float temperature = 0;
+    float humidity = 0;
+  
 
     while(1){
 
@@ -113,8 +163,17 @@ void coreiot_task(void *pvParameters){
         }
         client.loop();
 
+
+        if (xQueueReceive(humiQueue_CoreIOT, &humidity, pdMS_TO_TICKS(100))) {  
+            printf("[CoreIOT] Receive Humidity: %.2f\n", humidity);
+        }
+
+        if (xQueueReceive(tempQueue_CoreIOT, &temperature, pdMS_TO_TICKS(100))) {  
+            printf("[CoreIOT] Receive Temperature: %.2f\n", temperature);
+        }
+
         // Sample payload, publish to 'v1/devices/me/telemetry'
-        String payload = "{\"temperature\":" + String(glob_temperature) +  ",\"humidity\":" + String(glob_humidity) + "}";
+        String payload = "{\"temperature\":" + String(temperature) +  ",\"humidity\":" + String(humidity) + "}";
         
         client.publish("v1/devices/me/telemetry", payload.c_str());
 

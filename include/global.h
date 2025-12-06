@@ -8,8 +8,32 @@
 
 extern float glob_temperature;
 extern float glob_humidity;
-extern xQueueHandle tempQueue;
-extern xQueueHandle humiQueue;
+
+// Separate queues for each consumer task
+extern xQueueHandle tempQueue_LED;
+extern xQueueHandle tempQueue_Server;
+extern xQueueHandle tempQueue_CoreIOT;
+extern xQueueHandle tempQueue_TinyML;
+
+extern xQueueHandle humiQueue_Neo;
+extern xQueueHandle humiQueue_Server;
+extern xQueueHandle humiQueue_CoreIOT;
+extern xQueueHandle humiQueue_TinyML;
+
+extern QueueHandle_t lcdQueue;
+
+// Semaphore for LED temperature synchronization
+extern SemaphoreHandle_t Sema4need4LedBlinky_Temp;
+extern SemaphoreHandle_t Sema4need4NeoBlinky_Humi;
+extern SemaphoreHandle_t Sema4need4Humi;
+extern SemaphoreHandle_t Sema4need4Temp;
+extern SemaphoreHandle_t Sema4need4LCD;
+extern SemaphoreHandle_t Sema4LCDtemp;
+extern SemaphoreHandle_t Sema4LCDtempA;
+extern SemaphoreHandle_t Sema4LCDtempB;
+extern SemaphoreHandle_t Sema4LCDhumi;
+extern SemaphoreHandle_t Sema4LCDhumiA;
+extern SemaphoreHandle_t Sema4LCDhumiB;
 
 
 extern String WIFI_SSID;

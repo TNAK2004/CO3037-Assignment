@@ -157,6 +157,8 @@ function confirmDelete() {
 
 
 // ==================== SETTINGS FORM (BỔ SUNG) ====================
+let statusCheckInterval = null; //new - interval for polling connection status
+
 document.getElementById("settingsForm").addEventListener("submit", function (e) {
     e.preventDefault();
 
@@ -166,17 +168,50 @@ document.getElementById("settingsForm").addEventListener("submit", function (e) 
     const server = document.getElementById("server").value.trim();
     const port = document.getElementById("port").value.trim();
 
-    const settingsJSON = JSON.stringify({
-        page: "setting",
-        value: {
-            ssid: ssid,
-            password: password,
-            token: token,
-            server: server,
-            port: port
+    //new - send WiFi config via HTTP and start polling for connection status
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", `/connect?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(password)}`, true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            alert("📡 Đang kết nối WiFi...");
+            startStatusPolling(); //new - start checking connection status
         }
-    });
-
-    Send_Data(settingsJSON);
-    alert("✅ Cấu hình đã được gửi đến thiết bị!");
+    };
+    xhr.send();
 });
+
+//new - poll /status endpoint to check WiFi connection and auto-redirect
+function startStatusPolling() {
+    let attempts = 0;
+    const maxAttempts = 30; // Poll for 30 seconds max
+    
+    statusCheckInterval = setInterval(function() {
+        attempts++;
+        
+        fetch('/status') //new - check connection status from server
+            .then(response => response.json())
+            .then(data => {
+                console.log("Status:", data);
+                
+                if (data.status === "connected" && data.ip) { //new - connection successful
+                    clearInterval(statusCheckInterval);
+                    alert(`✅ Kết nối thành công! Đang chuyển hướng đến ${data.ip}...`);
+                    
+                    //new - automatically redirect to new IP address
+                    setTimeout(function() {
+                        window.location.href = `http://${data.ip}`;
+                    }, 2000);
+                } else if (attempts >= maxAttempts) { //new - timeout handling
+                    clearInterval(statusCheckInterval);
+                    alert("⚠️ Không thể kết nối WiFi. Vui lòng thử lại.");
+                }
+            })
+            .catch(err => {
+                console.warn("Status check failed:", err);
+                if (attempts >= maxAttempts) {
+                    clearInterval(statusCheckInterval);
+                    alert("⚠️ Không thể kết nối WiFi. Vui lòng thử lại.");
+                }
+            });
+    }, 1000); // Check every second
+}
